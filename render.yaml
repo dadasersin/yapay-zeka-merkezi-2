@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: yapay-zeka-merkezi
+    runtime: docker
+    plan: free
+    region: oregon
+    branch: main
+    healthCheckPath: /
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: GEMINI_API_KEY
+        sync: false
+    buildCommand: npm run build
+    startCommand: npm run start
