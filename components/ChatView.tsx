@@ -1,11 +1,14 @@
 
-import { GoogleGenAI, Type, FunctionDeclaration } from '@google/genai';
 import React, { useEffect, useRef, useState } from 'react';
+import { GoogleGenAI, Type, FunctionDeclaration } from '@google/genai';
 import { ChatMessage, SystemRequest } from '../types';
 import { callAI, AIProvider, AVAILABLE_MODELS } from '../aiService';
 import AIProviderSelector from './AIProviderSelector';
+import { useApiMode } from './ApiModeToggle';
+import { callMockAI } from '../mockService';
 
 const ChatView: React.FC = () => {
+  const { isApiMode } = useApiMode();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
@@ -106,74 +109,51 @@ const ChatView: React.FC = () => {
     try {
       // === GEMINI HANDLER ===
       if (provider === 'gemini') {
-        const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_GEMINI_API_KEY });
+        if (isApiMode && import.meta.env.VITE_GEMINI_API_KEY) {
+          // API Modu - Gerçek AI
+          const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_GEMINI_API_KEY });
 
-        let tools: any[] = [{ googleSearch: {} }];
+          let tools: any[] = [{ googleSearch: {} }];
 
-        if (useGrounding) {
-          tools.push({ googleMaps: {} });
-        } else {
-          tools.push({ functionDeclarations: [createTaskTool] });
-        }
-
-        let config: any = {
-          systemInstruction: "Sen 'Quantum AI Yapay Zeka Merkezi' Master Kontrol Ünitesisin. Kullanıcının görev veya yapılacaklar listesi isteklerini 'create_task' aracını kullanarak yönet. Ayrıca Google Search ve Maps araçlarını aktif kullanarak en güncel bilgileri sağla.",
-          tools
-        };
-
-        if (useGrounding) {
-          const location = await getUserLocation();
-          if (location) {
-            config.toolConfig = {
-              retrievalConfig: { latLng: { latitude: location.latitude, longitude: location.longitude } }
-            };
+          if (useGrounding) {
+            tools.push({ googleMaps: {} });
+          } else {
+            tools.push({ functionDeclarations: [createTaskTool] });
           }
-        } else if (useThinking) {
-          config.thinkingConfig = { thinkingBudget: 16000 };
-        }
 
-        const contents: any[] = [{ parts: [{ text: currentInput || "İçeriği analiz et." }] }];
-        if (currentAttachment) {
-          const b64Data = await fileToBase64(currentAttachment.file);
-          contents[0].parts.push({
-            inlineData: { data: b64Data, mimeType: currentAttachment.file.type }
-          });
-        }
+          let config: any = {
+            systemInstruction: "Sen 'Quantum AI Yapay Zeka Merkezi' Master Kontrol Ünitesisin. Kullanıcının görev veya yapılacaklar listesi isteklerini 'create_task' aracını kullanarak yönet. Ayrıca Google Search ve Maps araçlarını aktif kullanarak en güncel bilgileri sağla.",
+            tools
+          };
 
-        // Use selected model from state, default to gemini-3-pro-preview logic if needed
-        let targetModel = model;
-        if (useThinking && targetModel.includes('flash')) targetModel = 'gemini-3-pro-preview';
-
-        let response = await ai.models.generateContent({
-          model: targetModel,
-          contents,
-          config
-        });
-
-        if (response.functionCalls) {
-          const results = [];
-          for (const fc of response.functionCalls) {
-            if (fc.name === 'create_task') {
-              const { topic, priority } = fc.args as { topic: string, priority: 'low' | 'medium' | 'high' };
-              const task = saveTaskToStorage(topic, priority);
-              results.push({
-                id: fc.id,
-                name: fc.name,
-                response: { success: true, task_id: task.id }
-              });
+          if (useGrounding) {
+            const location = await getUserLocation();
+            if (location) {
+              config.toolConfig = {
+                retrievalConfig: { latLng: { latitude: location.latitude, longitude: location.longitude } }
+              };
             }
+          } else if (useThinking) {
+            config.thinkingConfig = { thinkingBudget: 16000 };
           }
 
-          response = await ai.models.generateContent({
+          const contents: any[] = [{ parts: [{ text: currentInput || "İçeriği analiz et." }] }];
+          if (currentAttachment) {
+            const b64Data = await fileToBase64(currentAttachment.file);
+            contents[0].parts.push({
+              inlineData: { data: b64Data, mimeType: currentAttachment.file.type }
+            });
+          }
+
+          // Use selected model from state, default to gemini-3-pro-preview logic if needed
+          let targetModel = model;
+          if (useThinking && targetModel.includes('flash')) targetModel = 'gemini-3-pro-preview';
+
+          let response = await ai.models.generateContent({
             model: targetModel,
-            contents: [
-              ...contents,
-              { role: 'model', parts: response.candidates[0].content.parts },
-              { role: 'user', parts: results.map(r => ({ functionResponse: r })) }
-            ],
+            contents,
             config
           });
-        }
 
         const grounding: Array<{ uri: string; title: string }> = [];
         const candidate = response.candidates?.[0];
