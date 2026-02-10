@@ -174,7 +174,17 @@ const ChatView: React.FC = () => {
         };
 
         setMessages(prev => [...prev, aiMsg]);
-
+      } else {
+        // Simülasyon Modu - Mock yanıt
+        const mockResponse = await callMockAI([{ role: 'user', content: currentInput }]);
+        const assistantMsg: ChatMessage = {
+          id: Date.now().toString(),
+          role: 'model',
+          text: mockResponse.text,
+          timestamp: new Date()
+        };
+        setMessages(prev => [...prev, assistantMsg]);
+      }
       } else {
         // === OTHER PROVIDERS (OpenAI, Anthropic, Groq) HANDLER ===
 
