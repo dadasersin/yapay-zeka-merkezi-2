@@ -1,6 +1,8 @@
-
-import React, { useState, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { GoogleGenAI } from '@google/genai';
+import { MediaAsset } from '../types';
+import { useApiMode } from './ApiModeToggle';
+import { mockDataGenerators } from '../mockService';
 
 interface VideoViewProps {
   apiKeyReady: boolean;
@@ -8,12 +10,13 @@ interface VideoViewProps {
 }
 
 const VideoView: React.FC<VideoViewProps> = ({ apiKeyReady, onOpenKeyPicker }) => {
+  const { isApiMode } = useApiMode();
   const [prompt, setPrompt] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
-  const [aspectRatio, setAspectRatio] = useState<'16:9' | '9:16'>('16:9');
-  const [baseImage, setBaseImage] = useState<string | null>(null);
   const [loadingStep, setLoadingStep] = useState('');
+  const [baseImage, setBaseImage] = useState<string | null>(null);
+  const [aspectRatio, setAspectRatio] = useState<'1:1' | '16:9' | '9:16'>('1:1');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -33,30 +36,40 @@ const VideoView: React.FC<VideoViewProps> = ({ apiKeyReady, onOpenKeyPicker }) =
     setLoadingStep('Nöral Kanallar Başlatılıyor...');
 
     try {
-      const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_GEMINI_API_KEY });
-      let videoRequest: any = {
-        model: 'veo-3.1-fast-generate-preview',
-        prompt: prompt,
-        config: { numberOfVideos: 1, resolution: '720p', aspectRatio: aspectRatio }
-      };
+      if (isApiMode && import.meta.env.VITE_GEMINI_API_KEY) {
+        // API Modu - Gerçek AI
+        const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_GEMINI_API_KEY });
+        let videoRequest: any = {
+          model: 'veo-3.1-fast-generate-preview',
+          prompt: prompt,
+          config: { numberOfVideos: 1, resolution: '720p', aspectRatio: aspectRatio }
+        };
 
-      if (baseImage) {
-        videoRequest.image = { imageBytes: baseImage, mimeType: 'image/png' };
-      }
+        if (baseImage) {
+          videoRequest.image = { imageBytes: baseImage, mimeType: 'image/png' };
+        }
 
-      let operation = await ai.models.generateVideos(videoRequest);
+        const operation = await ai.videos.generate(videoRequest);
 
-      while (!operation.done) {
-        await new Promise(resolve => setTimeout(resolve, 5000));
-        operation = await ai.operations.getVideosOperation({ operation: operation });
-        setLoadingStep(`Temporal Kareler Sentezleniyor... (%${operation.metadata?.progress || 0})`);
-      }
+        setLoadingStep('Temporal Kareler Sentezleniyor... (%0%)');
+        while (!operation.done) {
+          await new Promise(resolve => setTimeout(resolve, 5000));
+          operation = await ai.videos.getVideosOperation({ operation: operation });
+          setLoadingStep(`Temporal Kareler Sentezleniyor... (%${operation.metadata?.progress || 0}%)`);
+        }
 
-      const downloadLink = operation.response?.generatedVideos?.[0]?.video?.uri;
-      if (downloadLink) {
-        const response = await fetch(`${downloadLink}&key=${import.meta.env.VITE_GEMINI_API_KEY}`);
-        const blob = await response.blob();
-        setVideoUrl(URL.createObjectURL(blob));
+        const downloadLink = operation.response?.generatedVideos?.[0]?.video?.uri;
+        if (downloadLink) {
+          const response = await fetch(`${downloadLink}&key=${import.meta.env.VITE_GEMINI_API_KEY}`);
+          const blob = await response.blob();
+          setVideoUrl(URL.createObjectURL(blob));
+        }
+      } else {
+        // Simülasyon Modu - Mock video
+        await new Promise(resolve => setTimeout(resolve, 3000 + Math.random() * 2000));
+        setLoadingStep('Simülasyon Modunda Video Üretiliyor...');
+        const mockVideoUrl = await mockDataGenerators.generateVideo(prompt);
+        setVideoUrl(mockVideoUrl);
       }
     } catch (error: any) {
       console.error("Video Error:", error);
