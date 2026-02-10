@@ -2,8 +2,11 @@
 import React, { useState, useCallback, useRef } from 'react';
 import { GoogleGenAI, Type } from '@google/genai';
 import { WorkflowNode, WorkflowLink } from '../types';
+import { useApiMode } from './ApiModeToggle';
+import { callMockAI } from '../mockService';
 
 const WorkflowStudio: React.FC = () => {
+  const { isApiMode } = useApiMode();
   const [jsonInput, setJsonInput] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
@@ -57,58 +60,84 @@ const WorkflowStudio: React.FC = () => {
   const handleAiGenerate = async () => {
     if (!aiPrompt.trim() || isProcessing) return;
     setIsProcessing(true);
-    addLog("Gemini AI ile iş akışı tasarlanıyor...");
+    addLog("İş akışı tasarlanıyor...");
 
     try {
-      const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_GEMINI_API_KEY });
-      const response = await ai.models.generateContent({
-        model: 'gemini-3-pro-preview',
-        contents: `Aşağıdaki tanıma göre bir n8n benzeri iş akışı JSON'u oluştur. JSON şu yapıda olmalı: 
-        { "nodes": [ { "id": "1", "name": "Node Adı", "type": "node.type", "position": [x, y], "parameters": {} } ], 
-          "links": [ { "fromNode": "1", "toNode": "2" } ] }
-        
-        Kullanıcı Tanımı: ${aiPrompt}`,
-        config: {
-          responseMimeType: 'application/json',
-          responseSchema: {
-            type: Type.OBJECT,
-            properties: {
-              nodes: {
-                type: Type.ARRAY,
-                items: {
-                  type: Type.OBJECT,
-                  properties: {
-                    id: { type: Type.STRING },
-                    name: { type: Type.STRING },
-                    type: { type: Type.STRING },
-                    position: { type: Type.ARRAY, items: { type: Type.NUMBER } },
-                    parameters: { type: Type.OBJECT }
-                  },
-                  required: ['id', 'name', 'type', 'position']
+      if (isApiMode && import.meta.env.VITE_GEMINI_API_KEY) {
+        // API Modu - Gerçek AI
+        const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_GEMINI_API_KEY });
+        const response = await ai.models.generateContent({
+          model: 'gemini-3-pro-preview',
+          contents: `Aşağıdaki tanıma göre bir n8n benzeri iş akışı JSON'u oluştur. JSON şu yapıda olmalı: 
+          { "nodes": [ { "id": "1", "name": "Node Adı", "type": "node.type", "position": [x, y], "parameters": {} } ], 
+            "links": [ { "fromNode": "1", "toNode": "2" } ] }
+          
+          Kullanıcı Tanımı: ${aiPrompt}`,
+          config: {
+            responseMimeType: 'application/json',
+            responseSchema: {
+              type: Type.OBJECT,
+              properties: {
+                nodes: {
+                  type: Type.ARRAY,
+                  items: {
+                    type: Type.OBJECT,
+                    properties: {
+                      id: { type: Type.STRING },
+                      name: { type: Type.STRING },
+                      type: { type: Type.STRING },
+                      position: { type: Type.ARRAY, items: { type: Type.NUMBER } },
+                      parameters: { type: Type.OBJECT }
+                    },
+                    required: ['id', 'name', 'type', 'position']
+                  }
+                },
+                links: {
+                  type: Type.ARRAY,
+                  items: {
+                    type: Type.OBJECT,
+                    properties: {
+                      fromNode: { type: Type.STRING },
+                      toNode: { type: Type.STRING }
+                    },
+                    required: ['fromNode', 'toNode']
+                  }
                 }
               },
-              links: {
-                type: Type.ARRAY,
-                items: {
-                  type: Type.OBJECT,
-                  properties: {
-                    fromNode: { type: Type.STRING },
-                    toNode: { type: Type.STRING }
-                  },
-                  required: ['fromNode', 'toNode']
-                }
-              }
-            },
-            required: ['nodes', 'links']
+              required: ['nodes', 'links']
+            }
           }
-        }
-      });
-
-      const result = JSON.parse(response.text);
-      processJson(JSON.stringify(result));
-      addLog("AI İş akışı tasarımı tamamlandı.");
+        });
+        
+        const data = JSON.parse(response.text);
+        setNodes(data.nodes || []);
+        setLinks(data.links || []);
+        setJsonInput(JSON.stringify(data, null, 2));
+        addLog("✅ AI ile iş akışı başarıyla oluşturuldu.");
+      } else {
+        // Simülasyon Modu - Mock veri
+        await new Promise(resolve => setTimeout(resolve, 2000)); // Simüle edilmiş gecikme
+        
+        const mockWorkflow = {
+          nodes: [
+            { id: "1", name: "Başlat", type: "trigger", position: [100, 100] },
+            { id: "2", name: "İşlem", type: "action", position: [300, 100] },
+            { id: "3", name: "Sonuç", type: "output", position: [500, 100] }
+          ],
+          links: [
+            { fromNode: "1", toNode: "2" },
+            { fromNode: "2", toNode: "3" }
+          ]
+        };
+        
+        setNodes(mockWorkflow.nodes);
+        setLinks(mockWorkflow.links);
+        setJsonInput(JSON.stringify(mockWorkflow, null, 2));
+        addLog("✅ Simülasyon modunda iş akışı oluşturuldu.");
+      }
+      setActiveTab('visual');
     } catch (error: any) {
-      addLog(`AI Hata: ${error.message}`);
+      addLog(`❌ HATA: ${error.message}`);
     } finally {
       setIsProcessing(false);
     }
