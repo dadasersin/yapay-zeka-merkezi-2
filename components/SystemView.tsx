@@ -1,21 +1,11 @@
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 
 const SystemView: React.FC = () => {
-  const [ip, setIp] = useState('Detecting...');
-
-  useEffect(() => {
-    fetch('https://api.ipify.org?format=json')
-      .then(res => res.json())
-      .then(data => setIp(data.ip))
-      .catch(() => setIp('Unknown'));
-  }, []);
-
   const modules = [
     { name: 'Neural Reasoning', status: 'Optimal', load: '42%', color: 'text-cyan-400' },
     { name: 'Creative Synthesis', status: 'Active', load: '18%', color: 'text-purple-400' },
     { name: 'Temporal Processing', status: 'Standby', load: '0%', color: 'text-blue-400' },
-    { name: 'Remote IP Filter', status: 'Verified', load: ip, color: 'text-orange-400' },
     { name: 'Jules External Sync', status: 'Connected', load: '100%', color: 'text-emerald-400' },
   ];
 
@@ -29,7 +19,7 @@ const SystemView: React.FC = () => {
               <span className="text-[10px] font-black uppercase tracking-widest text-emerald-500">Core Online & Synced</span>
             </div>
           </div>
-
+          
           <h2 className="text-4xl font-black italic tracking-tighter text-white uppercase mb-4">Autonomous Intelligence</h2>
           <p className="text-gray-400 max-w-2xl leading-relaxed mb-10">
             Yapay Zeka Merkezi operates with full authorization. System is currently linked to <span className="text-cyan-400">Jules Session Protocol</span> for enhanced high-level reasoning and global grounding.
@@ -43,9 +33,9 @@ const SystemView: React.FC = () => {
                   <span className={`text-[10px] font-bold uppercase tracking-widest px-2 py-1 bg-white/5 rounded-lg ${m.color}`}>{m.status}</span>
                 </div>
                 <div className="flex items-end justify-between">
-                  <div className="text-3xl font-black italic text-white truncate max-w-[150px]">{m.load}</div>
+                  <div className="text-3xl font-black italic text-white">{m.load}</div>
                   <div className="w-24 h-1.5 bg-gray-800 rounded-full overflow-hidden">
-                    <div className={`h-full bg-current ${m.color}`} style={{ width: m.load.includes('%') ? m.load : '100%' }}></div>
+                    <div className={`h-full bg-current ${m.color}`} style={{ width: m.load }}></div>
                   </div>
                 </div>
               </div>
@@ -79,7 +69,7 @@ const SystemView: React.FC = () => {
         <div className="bg-gradient-to-br from-indigo-900/40 to-black border border-indigo-500/20 rounded-[40px] p-10 relative overflow-hidden h-full">
           <div className="absolute -bottom-20 -right-20 w-64 h-64 bg-indigo-500/10 blur-[80px] rounded-full"></div>
           <h3 className="text-xl font-black italic tracking-tighter text-white uppercase mb-8">AI Overrides</h3>
-
+          
           <div className="space-y-6">
             <div className="flex items-center justify-between p-4 bg-white/5 border border-white/10 rounded-2xl">
               <div>

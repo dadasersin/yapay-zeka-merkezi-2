@@ -19,7 +19,7 @@ const BuilderView: React.FC = () => {
             { name: 'Grafik Motoru', icon: 'fas fa-chart-bar' },
             { name: 'Veri Tablosu', icon: 'fas fa-table' }
           ].map(item => (
-            <button
+            <button 
               key={item.name}
               onClick={() => addComp(item.name)}
               className="w-full flex items-center gap-4 px-4 py-4 bg-black/40 border border-white/5 rounded-2xl text-gray-400 hover:text-cyan-400 hover:border-cyan-500/30 transition-all text-xs font-bold uppercase tracking-widest"
@@ -52,7 +52,7 @@ const BuilderView: React.FC = () => {
             ) : (
               components.map((c, i) => (
                 <div key={i} className="bg-white/5 border border-white/10 p-6 rounded-2xl flex justify-between items-center animate-in zoom-in duration-300">
-                  <span className="text-xs font-black uppercase tracking-widest text-gray-300">{c} Modülü #{i + 1}</span>
+                  <span className="text-xs font-black uppercase tracking-widest text-gray-300">{c} Modülü #{i+1}</span>
                   <div className="flex gap-2">
                     <button className="w-8 h-8 rounded-lg bg-black/40 flex items-center justify-center text-gray-500 hover:text-white transition-colors"><i className="fas fa-edit text-[10px]"></i></button>
                     <button className="w-8 h-8 rounded-lg bg-black/40 flex items-center justify-center text-gray-500 hover:text-red-500 transition-colors"><i className="fas fa-trash text-[10px]"></i></button>
@@ -60,26 +60,6 @@ const BuilderView: React.FC = () => {
                 </div>
               ))
             )}
-          </div>
-        </div>
-      </div>
-
-      <div className="lg:col-span-4 bg-white/5 border border-white/10 rounded-[32px] p-8 mt-4 backdrop-blur-xl">
-        <h4 className="text-xs font-black text-cyan-400 uppercase tracking-[0.3em] mb-4 flex items-center gap-3">
-          <i className="fas fa-info-circle"></i> Nasıl Kullanılır?
-        </h4>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-[11px] text-gray-400 leading-relaxed font-medium">
-          <div className="space-y-2">
-            <p className="text-white font-bold uppercase tracking-widest text-[9px]">1. Bileşen Seçimi</p>
-            <p>Sol taraftaki kütüphaneden ihtiyacınız olan modülleri (buton, grafik vb.) seçerek tuvale ekleyin.</p>
-          </div>
-          <div className="space-y-2">
-            <p className="text-white font-bold uppercase tracking-widest text-[9px]">2. Görsel Düzenleme</p>
-            <p>Eklediğiniz her modül anında tuval üzerinde listelenir. Sıralamayı ve yapılandırmayı buradan takip edin.</p>
-          </div>
-          <div className="space-y-2">
-            <p className="text-white font-bold uppercase tracking-widest text-[9px]">3. Kod Üretimi</p>
-            <p>Tasarımınız bittiğinde AI, bu yapıyı gerçek çalışan bir koda dönüştürmek için hazırdır (Gelecek özellik).</p>
           </div>
         </div>
       </div>

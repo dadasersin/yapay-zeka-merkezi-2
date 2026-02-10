@@ -18,7 +18,6 @@ const AIProviderSelector: React.FC<AIProviderSelectorProps> = ({
         { id: 'gemini', name: 'Gemini', icon: 'fa-gem', color: 'cyan' },
         { id: 'openai', name: 'GPT-4', icon: 'fa-robot', color: 'green' },
         { id: 'anthropic', name: 'Claude', icon: 'fa-brain', color: 'purple' },
-        { id: 'deepseek', name: 'DeepSeek', icon: 'fa-code', color: 'blue' },
         { id: 'groq', name: 'Groq', icon: 'fa-bolt', color: 'orange' }
     ];
 
@@ -55,7 +54,7 @@ const AIProviderSelector: React.FC<AIProviderSelectorProps> = ({
                     onChange={(e) => onModelChange(e.target.value)}
                     className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-sm text-white font-medium focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-all"
                 >
-                    {AVAILABLE_MODELS[selectedProvider]?.map((model) => (
+                    {AVAILABLE_MODELS[selectedProvider].map((model) => (
                         <option key={model} value={model} className="bg-black">
                             {model}
                         </option>
@@ -68,15 +67,13 @@ const AIProviderSelector: React.FC<AIProviderSelectorProps> = ({
                 <div className={`w-2 h-2 rounded-full animate-pulse ${selectedProvider === 'gemini' ? 'bg-cyan-400' :
                         selectedProvider === 'openai' ? 'bg-green-400' :
                             selectedProvider === 'anthropic' ? 'bg-purple-400' :
-                                selectedProvider === 'deepseek' ? 'bg-blue-400' :
-                                    'bg-orange-400'
+                                'bg-orange-400'
                     }`}></div>
                 <span className="text-gray-500 font-bold uppercase tracking-wider">
                     {selectedProvider === 'gemini' && 'Google Gemini'}
                     {selectedProvider === 'openai' && 'OpenAI GPT'}
                     {selectedProvider === 'anthropic' && 'Anthropic Claude'}
                     {selectedProvider === 'groq' && 'Groq (Llama/Mixtral)'}
-                    {selectedProvider === 'deepseek' && 'DeepSeek (Coding/Reasoning)'}
                     {' '}• {selectedModel}
                 </span>
             </div>
