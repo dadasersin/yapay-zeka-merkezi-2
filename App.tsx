@@ -13,6 +13,7 @@ import WorkflowStudio from './components/WorkflowStudio';
 import CryptoView from './components/CryptoView';
 import RequestView from './components/RequestView';
 import { ApiModeProvider, ApiModeToggle } from './components/ApiModeToggle';
+import ApiKeyManager from './components/ApiKeyManager';
 
 const App: React.FC = () => {
   const [currentView, setCurrentView] = useState<WorkspaceView>(WorkspaceView.CHAT);
@@ -57,6 +58,7 @@ const App: React.FC = () => {
     <ApiModeProvider>
       <div className="flex h-screen bg-black text-gray-100 overflow-hidden font-['Inter']">
         <ApiModeToggle />
+        <ApiKeyManager />
         <div className="fixed inset-0 pointer-events-none overflow-hidden">
           <div className="absolute top-[-10%] right-[-10%] w-[50%] h-[50%] bg-cyan-600/10 blur-[120px] rounded-full"></div>
           <div className="absolute bottom-[-10%] left-[-10%] w-[40%] h-[40%] bg-purple-600/10 blur-[100px] rounded-full"></div>
