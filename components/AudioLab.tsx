@@ -43,7 +43,7 @@ const AudioLab: React.FC = () => {
     if (!textToSpeech.trim() || isProcessing) return;
     setIsProcessing(true);
     try {
-      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+      const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_GEMINI_API_KEY });
       const response = await ai.models.generateContent({
         model: "gemini-2.5-flash-preview-tts",
         contents: [{ parts: [{ text: `Say clearly and naturally: ${textToSpeech}` }] }],
@@ -100,7 +100,7 @@ const AudioLab: React.FC = () => {
   const handleTranscribe = async (blob: Blob) => {
     setIsProcessing(true);
     try {
-      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+      const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_GEMINI_API_KEY });
       const reader = new FileReader();
       reader.readAsDataURL(blob);
       reader.onloadend = async () => {

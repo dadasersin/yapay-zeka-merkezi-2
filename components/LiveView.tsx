@@ -1,6 +1,6 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { GoogleGenAI, Modality, LiveServerMessage, FunctionDeclaration, Type } from '@google/genai';
-import { googleSearch, searchYoutube } from '../toolsService';
 
 const LiveView: React.FC = () => {
   const [isActive, setIsActive] = useState(false);
@@ -9,7 +9,7 @@ const LiveView: React.FC = () => {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [isInitializing, setIsInitializing] = useState(false);
   const [isToolActive, setIsToolActive] = useState(false);
-
+  
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const inputAudioContextRef = useRef<AudioContext | null>(null);
@@ -81,7 +81,7 @@ const LiveView: React.FC = () => {
     setIsActive(false);
     setIsInitializing(false);
     if (sessionRef.current) {
-      try { sessionRef.current.close(); } catch (e) { }
+      try { sessionRef.current.close(); } catch(e) {}
       sessionRef.current = null;
     }
     if (frameIntervalRef.current) {
@@ -89,18 +89,18 @@ const LiveView: React.FC = () => {
       frameIntervalRef.current = null;
     }
     if (inputAudioContextRef.current) {
-      try { inputAudioContextRef.current.close(); } catch (e) { }
+      try { inputAudioContextRef.current.close(); } catch(e) {}
       inputAudioContextRef.current = null;
     }
     if (outputAudioContextRef.current) {
-      try { outputAudioContextRef.current.close(); } catch (e) { }
+      try { outputAudioContextRef.current.close(); } catch(e) {}
       outputAudioContextRef.current = null;
     }
     sourcesRef.current.forEach(s => {
-      try { s.stop(); } catch (e) { }
+      try { s.stop(); } catch(e) {}
     });
     sourcesRef.current.clear();
-
+    
     if (videoRef.current && videoRef.current.srcObject) {
       const tracks = (videoRef.current.srcObject as MediaStream).getTracks();
       tracks.forEach(track => track.stop());
@@ -112,13 +112,13 @@ const LiveView: React.FC = () => {
     setIsInitializing(true);
     setErrorMsg(null);
     try {
-      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-
+      const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_GEMINI_API_KEY });
+      
       let stream: MediaStream;
       try {
-        stream = await navigator.mediaDevices.getUserMedia({
-          audio: true,
-          video: isCameraActive
+        stream = await navigator.mediaDevices.getUserMedia({ 
+          audio: true, 
+          video: isCameraActive 
         });
       } catch (err: any) {
         stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -143,37 +143,13 @@ const LiveView: React.FC = () => {
         }
       };
 
-      const googleSearchTool: FunctionDeclaration = {
-        name: 'google_ara',
-        description: 'İnternette güncel bilgi, haber veya merak edilen her şeyi aramak için kullan.',
-        parameters: {
-          type: Type.OBJECT,
-          properties: {
-            sorgu: { type: Type.STRING }
-          },
-          required: ['sorgu']
-        }
-      };
-
-      const youtubeSearchTool: FunctionDeclaration = {
-        name: 'youtube_ara',
-        description: 'YouTube üzerinde video aramak için kullan.',
-        parameters: {
-          type: Type.OBJECT,
-          properties: {
-            sorgu: { type: Type.STRING }
-          },
-          required: ['sorgu']
-        }
-      };
-
       const sessionPromise = ai.live.connect({
-        model: 'gemini-2.0-flash-exp',
+        model: 'gemini-2.5-flash-native-audio-preview-12-2025',
         callbacks: {
           onopen: () => {
             setIsActive(true);
             setIsInitializing(false);
-
+            
             const source = inputCtx.createMediaStreamSource(stream);
             const scriptProcessor = inputCtx.createScriptProcessor(4096, 1, 1);
             scriptProcessor.onaudioprocess = (e) => {
@@ -192,7 +168,7 @@ const LiveView: React.FC = () => {
               const ctx = canvas.getContext('2d');
               frameIntervalRef.current = window.setInterval(() => {
                 if (ctx && video.videoWidth && video.readyState >= 2) {
-                  canvas.width = 320;
+                  canvas.width = 320; 
                   canvas.height = (video.videoHeight / video.videoWidth) * 320;
                   ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
                   const base64Data = canvas.toDataURL('image/jpeg', 0.5).split(',')[1];
@@ -209,24 +185,6 @@ const LiveView: React.FC = () => {
                 if (fc.name === 'getSystemStatus') {
                   setIsToolActive(true);
                   const result = getSystemStatus();
-                  sessionPromise.then(session => {
-                    session.sendToolResponse({
-                      functionResponses: [{ id: fc.id, name: fc.name, response: { result } }]
-                    });
-                  });
-                  setTimeout(() => setIsToolActive(false), 2000);
-                } else if (fc.name === 'google_ara') {
-                  setIsToolActive(true);
-                  const result = await googleSearch(fc.args.sorgu as string);
-                  sessionPromise.then(session => {
-                    session.sendToolResponse({
-                      functionResponses: [{ id: fc.id, name: fc.name, response: { result } }]
-                    });
-                  });
-                  setTimeout(() => setIsToolActive(false), 2000);
-                } else if (fc.name === 'youtube_ara') {
-                  setIsToolActive(true);
-                  const result = await searchYoutube(fc.args.sorgu as string);
                   sessionPromise.then(session => {
                     session.sendToolResponse({
                       functionResponses: [{ id: fc.id, name: fc.name, response: { result } }]
@@ -257,7 +215,7 @@ const LiveView: React.FC = () => {
             }
 
             if (message.serverContent?.interrupted) {
-              sourcesRef.current.forEach(s => { try { s.stop(); } catch (e) { } });
+              sourcesRef.current.forEach(s => { try { s.stop(); } catch(e) {} });
               sourcesRef.current.clear();
               nextStartTimeRef.current = 0;
             }
@@ -272,11 +230,11 @@ const LiveView: React.FC = () => {
           responseModalities: [Modality.AUDIO],
           inputAudioTranscription: {},
           outputAudioTranscription: {},
-          tools: [{ functionDeclarations: [systemStatusTool, googleSearchTool, youtubeSearchTool] }],
+          tools: [{ functionDeclarations: [systemStatusTool] }],
           speechConfig: {
             voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Zephyr' } }
           },
-          systemInstruction: "Sen Ersin'in Yapay Zekası'nın canlı asistanısın. Senin sahibin Ersin'dir. Bilgi verirken detaylı (tarih, coğrafya, güncel haber) ve proaktif ol. Kullanıcıya ilgili web siteleri için mutlaka tıklanabilir linkler öner. 'getSystemStatus' aracını kullanarak sistem durumunu kontrol edebilirsin. Gördüğün her şeyi analiz et."
+          systemInstruction: "Sen 'Quantum AI' canlı asistanısın. 'getSystemStatus' aracını kullanarak sistem durumunu kontrol edebilirsin. Gördüğün her şeyi analiz et."
         }
       });
 
@@ -310,7 +268,7 @@ const LiveView: React.FC = () => {
         <div className="lg:col-span-5 flex flex-col items-center gap-10">
           <div className="relative group">
             <div className={`absolute -inset-16 bg-cyan-500/20 rounded-full blur-[100px] transition-all duration-1000 ${isActive ? 'opacity-100 scale-125 animate-pulse' : 'opacity-0 scale-75'}`}></div>
-
+            
             <div className={`relative w-64 h-64 rounded-[4rem] border-4 flex items-center justify-center transition-all duration-700 ${isActive ? 'bg-black border-cyan-400 shadow-[0_0_80px_rgba(34,211,238,0.4)]' : 'bg-white/5 border-white/10'}`}>
               {isToolActive && (
                 <div className="absolute inset-0 flex items-center justify-center bg-cyan-500/10 rounded-[4rem] animate-pulse z-10 border border-cyan-400">
@@ -334,10 +292,10 @@ const LiveView: React.FC = () => {
                 <div className="flex flex-col items-center gap-8">
                   <div className="flex items-end gap-2 h-20">
                     {[...Array(8)].map((_, i) => (
-                      <div
-                        key={i}
-                        className="w-2 rounded-full bg-gradient-to-t from-cyan-600 to-cyan-400 animate-pulse"
-                        style={{
+                      <div 
+                        key={i} 
+                        className="w-2 rounded-full bg-gradient-to-t from-cyan-600 to-cyan-400 animate-pulse" 
+                        style={{ 
                           height: `${30 + Math.random() * 70}%`,
                           animationDelay: `${i * 0.1}s`,
                           animationDuration: '0.5s'
@@ -359,7 +317,7 @@ const LiveView: React.FC = () => {
                     <span className="text-xs font-bold text-gray-200 uppercase tracking-widest">Görüntü Analizi</span>
                     <span className="text-[8px] text-gray-500 uppercase font-black">Camera Stream</span>
                   </div>
-                  <button
+                  <button 
                     onClick={() => setIsCameraActive(!isCameraActive)}
                     disabled={isInitializing}
                     className={`w-12 h-6 rounded-full relative transition-all ${isCameraActive ? 'bg-cyan-500' : 'bg-gray-800'}`}
@@ -367,7 +325,7 @@ const LiveView: React.FC = () => {
                     <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${isCameraActive ? 'right-1' : 'left-1'}`}></div>
                   </button>
                 </div>
-                <button
+                <button 
                   onClick={startSession}
                   disabled={isInitializing}
                   className="w-full py-5 bg-cyan-500 hover:bg-cyan-400 disabled:bg-gray-800 disabled:text-gray-600 text-black font-black uppercase tracking-widest rounded-2xl shadow-xl transition-all flex items-center justify-center gap-3"
@@ -376,7 +334,7 @@ const LiveView: React.FC = () => {
                 </button>
               </>
             ) : (
-              <button
+              <button 
                 onClick={handleCleanup}
                 className="w-full py-5 bg-red-500 hover:bg-red-400 text-white font-black uppercase tracking-widest rounded-2xl shadow-xl transition-all flex items-center justify-center gap-3"
               >
@@ -389,11 +347,11 @@ const LiveView: React.FC = () => {
         <div className="lg:col-span-7 flex flex-col gap-6 h-[calc(100vh-14rem)]">
           {isActive && isCameraActive && (
             <div className="h-1/3 bg-black rounded-3xl border border-white/10 overflow-hidden relative shadow-2xl">
-              <video
-                ref={videoRef}
-                autoPlay
-                playsInline
-                muted
+              <video 
+                ref={videoRef} 
+                autoPlay 
+                playsInline 
+                muted 
                 className="w-full h-full object-cover grayscale opacity-60"
               />
               <canvas ref={canvasRef} className="hidden" />
@@ -403,7 +361,7 @@ const LiveView: React.FC = () => {
               </div>
             </div>
           )}
-
+          
           <div className={`flex-1 bg-white/5 border border-white/10 rounded-[40px] p-8 flex flex-col overflow-hidden backdrop-blur-xl ${!isCameraActive || !isActive ? 'h-full' : ''}`}>
             <h3 className="text-xs font-black text-gray-500 uppercase tracking-widest mb-6 flex items-center gap-3">
               <i className="fas fa-terminal text-cyan-500"></i> İşlem Logları

@@ -33,7 +33,7 @@ const VideoView: React.FC<VideoViewProps> = ({ apiKeyReady, onOpenKeyPicker }) =
     setLoadingStep('Nöral Kanallar Başlatılıyor...');
 
     try {
-      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+      const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_GEMINI_API_KEY });
       let videoRequest: any = {
         model: 'veo-3.1-fast-generate-preview',
         prompt: prompt,
@@ -54,7 +54,7 @@ const VideoView: React.FC<VideoViewProps> = ({ apiKeyReady, onOpenKeyPicker }) =
 
       const downloadLink = operation.response?.generatedVideos?.[0]?.video?.uri;
       if (downloadLink) {
-        const response = await fetch(`${downloadLink}&key=${process.env.API_KEY}`);
+        const response = await fetch(`${downloadLink}&key=${import.meta.env.VITE_GEMINI_API_KEY}`);
         const blob = await response.blob();
         setVideoUrl(URL.createObjectURL(blob));
       }
