@@ -204,7 +204,6 @@ const ChatView: React.FC = () => {
 
         setMessages(prev => [...prev, aiMsg]);
       }
-
     } catch (error: any) {
       console.error("Chat Error:", error);
       setMessages(prev => [...prev, {
