@@ -15,8 +15,24 @@ import RequestView from './components/RequestView';
 import { ApiModeProvider, ApiModeToggle } from './components/ApiModeToggle';
 import ApiKeyManager from './components/ApiKeyManager';
 
+// Yeni özellikler
+import VideoEditor from './components/VideoEditor';
+import AudioStudio from './components/AudioStudio';
+import DataAnalytics from './components/DataAnalytics';
+import MultiModalAI from './components/MultiModalAI';
+import AutomationStudio from './components/AutomationStudio';
+import ArtStudio from './components/ArtStudio';
+import GameDevStudio from './components/GameDevStudio';
+import TeamCollaboration from './components/TeamCollaboration';
+import AdvancedChat from './components/AdvancedChat';
+import SecurityCenter from './components/SecurityCenter';
+import AnalyticsDashboard from './components/AnalyticsDashboard';
+import IntegrationsHub from './components/IntegrationsHub';
+import SocialMediaManager from './components/SocialMediaManager';
+import HomeDashboard from './components/HomeDashboard';
+
 const App: React.FC = () => {
-  const [currentView, setCurrentView] = useState<WorkspaceView>(WorkspaceView.CHAT);
+  const [currentView, setCurrentView] = useState<WorkspaceView>(WorkspaceView.HOME);
   const [apiKeyReady, setApiKeyReady] = useState(false);
 
   useEffect(() => {
@@ -40,6 +56,7 @@ const App: React.FC = () => {
 
   const renderView = () => {
     switch (currentView) {
+      // Mevcut özellikler
       case WorkspaceView.CHAT: return <ChatView />;
       case WorkspaceView.CREATIVE: return <CreativeView apiKeyReady={apiKeyReady} onOpenKeyPicker={handleOpenKeyPicker} />;
       case WorkspaceView.VIDEO: return <VideoView apiKeyReady={apiKeyReady} onOpenKeyPicker={handleOpenKeyPicker} />;
@@ -50,7 +67,24 @@ const App: React.FC = () => {
       case WorkspaceView.WORKFLOW: return <WorkflowStudio />;
       case WorkspaceView.CRYPTO: return <CryptoView />;
       case WorkspaceView.REQUESTS: return <RequestView />;
-      default: return <ChatView />;
+      
+      // Yeni özellikler (API olmadan çalışır)
+      case WorkspaceView.VIDEO_EDITOR: return <VideoEditor />;
+      case WorkspaceView.AUDIO_STUDIO: return <AudioStudio />;
+      case WorkspaceView.DATA_ANALYTICS: return <DataAnalytics />;
+      case WorkspaceView.MULTIMODAL_AI: return <MultiModalAI />;
+      case WorkspaceView.AUTOMATION_STUDIO: return <AutomationStudio />;
+      case WorkspaceView.ART_STUDIO: return <ArtStudio />;
+      case WorkspaceView.GAME_DEV: return <GameDevStudio />;
+      case WorkspaceView.TEAM_COLLAB: return <TeamCollaboration />;
+      case WorkspaceView.ADVANCED_CHAT: return <AdvancedChat />;
+      case WorkspaceView.SECURITY_CENTER: return <SecurityCenter />;
+      case WorkspaceView.ANALYTICS_DASHBOARD: return <AnalyticsDashboard />;
+      case WorkspaceView.INTEGRATIONS: return <IntegrationsHub />;
+      case WorkspaceView.SOCIAL_MEDIA: return <SocialMediaManager />;
+      case WorkspaceView.HOME: return <HomeDashboard />;
+      
+      default: return <HomeDashboard />;
     }
   };
 
@@ -81,6 +115,21 @@ const App: React.FC = () => {
                   {currentView === WorkspaceView.WORKFLOW && "Neural Workflow Studio"}
                   {currentView === WorkspaceView.CRYPTO && "Kripto Bot Motoru"}
                   {currentView === WorkspaceView.REQUESTS && "İstek Yönetimi"}
+                  
+                  {currentView === WorkspaceView.HOME && "🚀 Quantum AI Merkezi"}
+                  {currentView === WorkspaceView.VIDEO_EDITOR && "🎬 Video Editör"}
+                  {currentView === WorkspaceView.AUDIO_STUDIO && "🎵 Ses Stüdyosu"}
+                  {currentView === WorkspaceView.DATA_ANALYTICS && "📊 Veri Analizi"}
+                  {currentView === WorkspaceView.MULTIMODAL_AI && "🧠 Multi-Modal AI"}
+                  {currentView === WorkspaceView.AUTOMATION_STUDIO && "🔄 Otomasyon Akışları"}
+                  {currentView === WorkspaceView.ART_STUDIO && "🎨 Sanat Stüdyosu"}
+                  {currentView === WorkspaceView.GAME_DEV && "🎮 Oyun Geliştirme"}
+                  {currentView === WorkspaceView.TEAM_COLLAB && "👥 Ekip Çalışması"}
+                  {currentView === WorkspaceView.ADVANCED_CHAT && "💬 Gelişmiş Sohbet"}
+                  {currentView === WorkspaceView.SECURITY_CENTER && "🔐 Güvenlik Merkezi"}
+                  {currentView === WorkspaceView.ANALYTICS_DASHBOARD && "📈 Analytics Dashboard"}
+                  {currentView === WorkspaceView.INTEGRATIONS && "🔗 Entegrasyonlar"}
+                  {currentView === WorkspaceView.SOCIAL_MEDIA && "📢 Sosyal Medya"}
                 </h1>
                 <div className="h-2 w-2 rounded-full bg-cyan-400 animate-pulse shadow-[0_0_10px_rgba(34,211,238,0.8)]"></div>
               </div>

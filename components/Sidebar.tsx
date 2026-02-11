@@ -9,6 +9,7 @@ interface SidebarProps {
 
 const Sidebar: React.FC<SidebarProps> = ({ currentView, onViewChange }) => {
   const navItems = [
+    { id: WorkspaceView.HOME, label: '🏠 Ana Sayfa', icon: 'fas fa-home' },
     { id: WorkspaceView.CHAT, label: 'Panel', icon: 'fas fa-th-large' },
     { id: WorkspaceView.WORKFLOW, label: 'Workflow Studio', icon: 'fas fa-project-diagram' },
     { id: WorkspaceView.LIVE, label: 'Canlı Asistan', icon: 'fas fa-robot' },
@@ -18,6 +19,19 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, onViewChange }) => {
   ];
 
   const toolItems = [
+    { id: WorkspaceView.VIDEO_EDITOR, label: '🎬 Video Editör', icon: 'fas fa-film' },
+    { id: WorkspaceView.AUDIO_STUDIO, label: '🎵 Ses Stüdyosu', icon: 'fas fa-music' },
+    { id: WorkspaceView.DATA_ANALYTICS, label: '📊 Veri Analizi', icon: 'fas fa-chart-bar' },
+    { id: WorkspaceView.MULTIMODAL_AI, label: '🧠 Multi-Modal AI', icon: 'fas fa-brain' },
+    { id: WorkspaceView.AUTOMATION_STUDIO, label: '🔄 Otomasyon', icon: 'fas fa-robot' },
+    { id: WorkspaceView.ART_STUDIO, label: '🎨 Sanat Stüdyosu', icon: 'fas fa-palette' },
+    { id: WorkspaceView.GAME_DEV, label: '🎮 Oyun Geliştirme', icon: 'fas fa-gamepad' },
+    { id: WorkspaceView.TEAM_COLLAB, label: '👥 Ekip Çalışması', icon: 'fas fa-users' },
+    { id: WorkspaceView.ADVANCED_CHAT, label: '💬 Gelişmiş Sohbet', icon: 'fas fa-comments' },
+    { id: WorkspaceView.SECURITY_CENTER, label: '🔐 Güvenlik', icon: 'fas fa-shield-alt' },
+    { id: WorkspaceView.ANALYTICS_DASHBOARD, label: '📈 Analytics', icon: 'fas fa-chart-line' },
+    { id: WorkspaceView.INTEGRATIONS, label: '🔗 Entegrasyonlar', icon: 'fas fa-plug' },
+    { id: WorkspaceView.SOCIAL_MEDIA, label: '📢 Sosyal Medya', icon: 'fas fa-share-alt' },
     { id: WorkspaceView.BUILDER, label: 'Otonom İnşa', icon: 'fas fa-cube' },
     { id: WorkspaceView.CRYPTO, label: 'Kripto Bot', icon: 'fas fa-chart-line' },
     { id: WorkspaceView.REQUESTS, label: 'İstekler', icon: 'fas fa-clipboard-list' },
